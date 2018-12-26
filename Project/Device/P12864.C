@@ -1,0 +1,458 @@
+#include "P12864.h"
+#include  "Fdelay.h"
+#include  "string.h"
+
+
+const unsigned char  sum0 []={0x00,0xFE,0xFE,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xFE,0xFE,0x00,};
+const unsigned char sum1 []={0x00,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x00,};
+const unsigned char sum2 []={0x00,0xFE,0xFE,0x06,0x06,0x06,0x06,0xFE,0xFE,0xC0,0xC0,0xC0,0xC0,0xFE,0xFE,0x00,};
+const unsigned char sum3 []={0x00,0xFE,0xFE,0x06,0x06,0x06,0x06,0xFE,0xFE,0x06,0x06,0x06,0x06,0xFE,0xFE,0x00,};
+const unsigned char sum4 []={0x00,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0xFE,0xFE,0x0C,0x0C,0x0C,0x0C,0x00,};
+const unsigned char sum5 []={0x00,0xFE,0xFE,0xC0,0xC0,0xC0,0xC0,0xFE,0xFE,0x06,0x06,0x06,0x06,0xFE,0xFE,0x00,};
+const unsigned char sum6 []={0x00,0xFE,0xFE,0xC0,0xC0,0xC0,0xC0,0xFE,0xFE,0xC6,0xC6,0xC6,0xC6,0xFE,0xFE,0x00,};
+const unsigned char sum7 []={0x00,0xFE,0xFE,0x06,0x06,0x06,0x06,0x06,0x06,0x06,0x06,0x06,0x06,0x06,0x06,0x00,};
+const unsigned char sum8 []={0x00,0xFE,0xFE,0xC6,0xC6,0xC6,0xC6,0xFE,0xFE,0xC6,0xC6,0xC6,0xC6,0xFE,0xFE,0x00,};
+const unsigned char sum9 []={0x00,0xFE,0xFE,0xC6,0xC6,0xC6,0xC6,0xFE,0xFE,0x06,0x06,0x06,0x06,0xFE,0xFE,0x00,};
+const unsigned char maohao[]={0x00,0x00,0x18,0x18,0x18,0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x18,0x00,0x00,0x00,};
+const unsigned char space[]={0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,};
+const unsigned char   A  []={0x00,0x10,0x38,0x7C,0xEE,0xC6,0xC6,0xC6,0xFE,0xFE,0xC6,0xC6,0xC6,0xC6,0xC6,0x00,};
+const unsigned char   BB  []={0x00,0xF8,0xFC,0xCC,0xC6,0xC6,0xCE,0xFC,0xFC,0xCE,0xC6,0xC6,0xCE,0xFC,0xFC,0x00,};
+const unsigned char   C  []={0x00,0x3E,0x7E,0xE0,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xE0,0x7E,0x3E,0x00,};
+const unsigned char   D  []={0x00,0xE0,0xF8,0xDC,0xCE,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xCE,0xDC,0xF8,0xE0,0x00,};
+const unsigned char   E  []={0x00,0xFE,0xFE,0xC0,0xC0,0xC0,0xC0,0xFE,0xFE,0xC0,0xC0,0xC0,0xC0,0xFE,0xFE,0x00,};
+const unsigned char   F  []={0x00,0xFE,0xFE,0xC0,0xC0,0xC0,0xC0,0xFE,0xFE,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0x00,};
+const unsigned char   G  []={0x00,0x38,0x7C,0xC6,0xC6,0xC6,0xC0,0xC0,0xC0,0xC0,0xCE,0xCE,0xC6,0x7E,0x3A,0x00,};
+const unsigned char   H  []={0x00,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xFE,0xFE,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0x00,};
+const unsigned char   I  []={0x00,0x7E,0x7E,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x7E,0x7E,0x00,};
+const unsigned char   J  []={0x00,0x3C,0x3C,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0xD8,0xF8,0x78,0x00,};
+const unsigned char   K  []={0x00,0xC6,0xC6,0xC6,0xCC,0xCC,0xD8,0xF0,0xF0,0xD8,0xCC,0xCC,0xC6,0xC6,0xC6,0x00,};
+const unsigned char   L  []={0x00,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xFE,0xFE,0x00,};
+const unsigned char   M  []={0x00,0xEE,0xEE,0xEE,0xEE,0xFE,0xFE,0xFE,0xFE,0xD6,0xD6,0xD6,0xD6,0xD6,0xC6,0x00,};
+const unsigned char   N  []={0x00,0xE6,0xE6,0xE6,0xF6,0xF6,0xF6,0xF6,0xDE,0xDE,0xDE,0xDE,0xCE,0xCE,0xCE,0x00,};
+const unsigned char   O  []={0x00,0x7C,0xFE,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xFE,0x7C,0x00,};
+const unsigned char   PP  []={0x00,0xF0,0xF8,0xDC,0xCE,0xC6,0xCE,0xDC,0xF8,0xF0,0xC0,0xC0,0xC0,0xC0,0xC0,0x00,};
+const unsigned char   Q  []={0x00,0x7C,0xFE,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xDE,0xFC,0x7E,0x06,0x00,};
+const unsigned char   R  []={0x00,0xF8,0xFC,0xCE,0xC6,0xC6,0xC6,0xCE,0xFC,0xF8,0xF0,0xF0,0xD8,0xDE,0xCE,0x00,};
+const unsigned char   S  []={0x00,0x18,0x7E,0xE6,0xC0,0xC0,0xC0,0xE0,0x7C,0x3E,0x06,0x06,0xC6,0xFE,0x38,0x00,};
+const unsigned char   T  []={0x00,0xFE,0xFE,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x00,};
+const unsigned char   U  []={0x00,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xEE,0x7C,0x7C,0x00,};
+const unsigned char   V  []={0x00,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xEE,0x6C,0x6C,0x7C,0x7C,0x38,0x38,0x10,0x00,};
+const unsigned char	 W  []={0x00,0xC6,0xC6,0xC6,0xC6,0xD6,0xD6,0xD6,0xD6,0xD6,0xFE,0xFE,0xEE,0x6C,0x28,0x00,};
+const unsigned char   X  []={0x00,0x82,0xC6,0xC6,0x6C,0x7C,0x38,0x10,0x10,0x38,0x7C,0x6C,0xC6,0xC6,0x82,0x00,};
+const unsigned char   Y  []={0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xFE,0x7C,0x38,0x38,0x38,0x38,0x38,0x38,0x00,};
+const unsigned char   Z  []={0x00,0xFE,0xFE,0x06,0x0E,0x0C,0x18,0x18,0x18,0x38,0x70,0xE0,0xC0,0xFE,0xFE,0x00,};
+
+const unsigned char  *sum []={space,sum0,sum1,sum2,sum3,sum4,sum5,sum6,sum7,sum8,sum9,maohao,A,BB,C,D,E,F,G,H,I,J,K,L,M,N,O,PP,Q,R,S,T,U,V,W,X,Y,Z,};  //A,BB,C,D,E,F,G,H,I,J,K,L,M,N,O,PP,Q,R,S,T,U,V,W,X,Y,Z,										
+
+unsigned char gra12864[64][16];//显存
+/***********************************
+		动画选择
+************************************/
+void Fgraphic12864(unsigned int speed,unsigned char dir,unsigned char mode,const unsigned char pic[64][16])
+{
+ switch(mode)
+ {
+  case 0: xgra12864_baiyechuang (speed,dir,pic); 	break;
+  case 1: cxgra12864_baiyechuang (speed); 			break;
+  case 2: roundgra12864_solo (speed,dir,pic); 		break;
+  case 3: croundgra12864_solo (speed); 				break;
+  case 4: suijixiantiaogra12864 (speed,dir,pic); 	break;
+  case 5: csuijixiantiaogra12864 (speed); 			break;
+  case 6: ygra12864 (speed,dir,pic); 				break;
+  case 7: yogra12864 (speed,dir,pic); 				break;
+  case 8: fanzhuan12864(); 							break;
+  case 9: Draw12864(dir,pic);						break;
+ }
+}
+//直接显示图片
+void Draw12864(unsigned char dir,const unsigned char pic[64][16])
+{
+  char x,y;
+ for(x=0;x<16;x++)
+ {
+  for(y=0;y<64;y++)
+  {
+   if(dir)
+   gra12864[y][x] = pic[y][x];
+   else
+   gra12864[y][x] = ~pic[y][x];
+  }
+ }
+    refresh_12864();
+}
+//翻转显示
+void fanzhuan12864()
+{
+ char x,y;
+ for(x=0;x<16;x++)
+ {
+  for(y=0;y<64;y++)
+  {
+   gra12864[y][x] = ~gra12864[y][x];
+  }
+ }
+    refresh_12864();
+}
+/**********************************
+ 垂直进入特效
+***********************************/
+void ygra12864 (unsigned int speed,char dir,const unsigned char pic[64][16])
+{
+  char x,y,origin=0;
+  while(origin<64)
+  {
+  for(y=63-origin;y<64;y++)
+  {
+   for(x=0;x<16;x++)
+   {
+    if(dir)
+	gra12864[y][x] = pic[y-63+origin][x];
+	else
+	gra12864[y][x] = ~pic[y-63+origin][x];
+   }
+
+  }
+     delayus(speed);
+   refresh_12864();
+   origin++;
+   }
+}
+//垂直退出
+void yogra12864 (unsigned int speed,char dir,const unsigned char pic[64][16])
+{
+    char x,y,origin=0;
+  while(origin<64)
+  {
+  for(y=0;y<64;y++)
+  {
+   if(y+origin<64)
+   for(x=0;x<16;x++)
+   {
+    if(dir)
+	gra12864[y][x] = pic[y+origin][x];
+	else
+	gra12864[y][x] = ~pic[y+origin][x];
+   }
+   else
+      for(x=0;x<16;x++)
+   {
+    if(dir)
+	gra12864[y][x] = 0X00;
+	else
+	gra12864[y][x] = 0XFF;
+   }
+  }
+     delayus(speed);
+   refresh_12864();
+   origin++;
+   }
+}
+//百叶窗
+void xgra12864_baiyechuang (unsigned int speed,char dir,const unsigned char pic[64][16])
+{
+    char x,y,origin = 0;
+while(origin<9)
+{
+  for(x=0;x<16;x++)
+  {
+   for(y=0;y<64;y++)
+   {
+   if(dir)
+	gra12864[y][x] = pic[y][x]&(~(0XFF<<origin));
+	else
+	gra12864[y][x] = ~pic[y][x]&(~(0XFF<<origin));
+   }
+
+  }
+     delayus(speed);
+   refresh_12864();
+   origin++;
+}
+}
+//百叶窗消失
+void cxgra12864_baiyechuang (unsigned int speed)
+{
+  char x,y,origin = 0;
+  while(origin<9)
+  {
+   for(x=0;x<16;x++)
+   {
+	for(y=0;y<64;y++)
+	{
+	 gra12864[y][x] =  gra12864[y][x]&(0XFF>>origin);
+	}
+   }
+   delayus(speed);
+   refresh_12864();
+   origin++;
+  }
+}
+
+//单线旋转
+void roundgra12864_solo (unsigned int speed,char dir,const unsigned char pic[64][16])
+{
+ char x,y,px,py,k,origin = 0;
+   while(origin<64)
+  {
+   k=(32-origin);
+   for(x=0;x<16;x++)
+   {
+    py = k*x/8 + 32-8*k/8;
+	for(y=0;y<64;y++)
+	{
+	 if(y==py)
+	 {
+	 if(dir)
+	 gra12864[y][x] =  pic[y][x];
+	 else
+	 gra12864[y][x] =  ~pic[y][x];
+	 }
+	}
+   }
+   delayus(speed);
+   refresh_12864();
+   origin++;
+  }
+  origin = 0;
+     while(origin<17)
+  {
+   k=origin-8;
+   for(y=0;y<64;y++)
+   {
+    px = k*y/32 + 8-k;
+	for(x=0;x<16;x++)
+	{
+	 if(x==px)
+	 {
+	 if(dir)
+	 gra12864[y][x] =  pic[y][x];
+	 else
+	 gra12864[y][x] =  ~pic[y][x];
+	 }
+	}
+   }
+   delayus(speed);
+   refresh_12864();
+   origin++;
+  }
+}
+//单线旋转消退
+void croundgra12864_solo (unsigned int speed)
+{
+   char x,y,px,py,k,origin = 0;
+   while(origin<64)
+  {
+   k=(32-origin);
+   for(x=0;x<16;x++)
+   {
+    py = k*x/8 + 32-8*k/8;
+	for(y=0;y<64;y++)
+	{
+	 if(y==py)
+	 gra12864[y][x] =  0;
+	}
+   }
+   delayus(speed);
+   refresh_12864();
+   origin++;
+  }
+  origin = 0;
+     while(origin<17)
+  {
+   k=origin-8;
+   for(y=0;y<64;y++)
+   {
+    px = k*y/32 + 8-k;
+	for(x=0;x<16;x++)
+	{
+	 if(x==px)
+	 gra12864[y][x] =  0;
+	}
+   }
+   delayus(speed);
+   refresh_12864();
+   origin++;
+  }
+}
+//随机线条
+void suijixiantiaogra12864 (unsigned int speed,char dir,const unsigned char pic[64][16])
+{
+ char x,y,line,line_temp=0,block,lines;
+ while(line_temp<8)
+ {
+ line = line_temp;
+ for(block=0;block<8;block++)
+ {
+ lines = line + block*8;
+ for(y=0;y<64;y++)
+ {
+  if(lines==y)
+  for(x=0;x<16;x++)
+  {
+  if(dir)
+   gra12864[y][x] = pic[y][x];
+   else
+   gra12864[y][x] = ~pic[y][x];
+  }
+ }
+  line++; if(line>7)line=0;
+   delayus(speed);
+   refresh_12864();
+ }
+  line_temp++;
+ }
+}
+//随机线条消失
+void csuijixiantiaogra12864 (unsigned int speed)
+{
+   char x,y,line,line_temp=0,block,lines;
+ while(line_temp<8)
+ {
+ line = line_temp;
+ for(block=0;block<8;block++)
+ {
+ lines = line + block*8;
+ for(y=0;y<64;y++)
+ {
+  if(lines==y)
+  for(x=0;x<16;x++)
+  {
+   gra12864[y][x] = 0;
+  }
+ }
+  line++; if(line>7)line=0;
+   delayus(speed);
+   refresh_12864();
+ }
+  line_temp++;
+ }
+}
+/*********************
+	绘图清屏
+**********************/
+void clsgraphic ()
+{
+    char x,y;
+
+  for(y=0;y<64;y++)
+  {
+   for(x=0;x<16;x++)
+   {
+	gra12864[y][x] = 0;
+   }
+
+  }
+   refresh_12864();
+
+}
+/***********************
+	单行反白
+************************/
+void fanbai (unsigned char line)
+{
+unsigned char x,y,pline=line*16;
+
+if(line>3)return;
+ clsgraphic ();
+   for(y=pline;y<pline+16;y++)
+  {
+   for(x=0;x<16;x++)
+   {
+	gra12864[y][x] = 0XFF;
+   }
+
+  }
+      refresh_12864();
+}
+/***************************
+	 桌面反白
+***************************/
+void fanbai_gra (unsigned char newline,unsigned char lines)
+{
+ static  unsigned char last_lines=0X0F;
+ unsigned char y=0,x=0;
+ if(lines>3) lines = 3;
+ if(newline) last_lines = 0X0F;
+ if(last_lines!=lines)
+ {
+ if(last_lines<4)
+ for(x=8*((last_lines+2)%2);x<8*((last_lines+2)%2)+8;x++)
+ {
+  for(y=32*(last_lines/2);y<32*(last_lines/2)+32;y++)
+  {
+   gra12864[y][x] = ~gra12864[y][x];
+  }
+ }
+  for(x=8*((lines+2)%2);x<8*((lines+2)%2)+8;x++)
+ {
+  for(y=32*(lines/2);y<32*(lines/2)+32;y++)
+  {
+   gra12864[y][x] = ~gra12864[y][x];
+  }
+ }
+ }
+ last_lines = lines;
+        refresh_12864();
+}
+/**************************
+	指针显示
+**************************/
+void point_line (unsigned char on,unsigned char lines)
+{
+	string12864(0,0," ");
+	string12864(0,1," ");
+	string12864(0,2," ");
+	string12864(0,3," ");
+	if(on)
+	string12864(0,lines,">");
+}
+/***************************
+	 进度条显示
+***************************/
+void ratio_display (unsigned char lines,unsigned char ratio[16])
+{
+ unsigned char yaddr=0,xaddr=0;
+    Cmd_12864(0x34);//高级模式
+  graphicmode12864();
+  for(yaddr=0;yaddr<4;yaddr++)
+  {
+				 if(lines>3)           
+				    { 
+				      Cmd_12864(0x80 + lines*8+yaddr); //SET  垂直地址 VERTICAL ADD
+				      Cmd_12864(0x80);     //SET  水平地址 HORIZONTAL ADD
+					 for(xaddr=0;xaddr<16;xaddr++)
+					 {
+					   Data_12864(ratio[xaddr*2]);
+					   Data_12864(ratio[xaddr*2+1]);
+					  }
+				    }
+	
+				 else           
+				    { 
+				      Cmd_12864(0x80 + lines*8+yaddr-32); //SET  垂直地址 VERTICAL ADD
+				      Cmd_12864(0x88);     //SET  水平地址 HORIZONTAL ADD
+					 for(xaddr=0;xaddr<16;xaddr++)
+					 {
+					   Data_12864(ratio[xaddr*2]);
+					   Data_12864(ratio[xaddr*2+1]);
+					  }
+				    }
+   }
+   Cmd_12864(0x30);//普通模式
+}
+/*******************
+	屏幕文字模式内容罗列
+*******************/
+void string12864_all(unsigned int Delay,unsigned char deviation,unsigned char pages, char **str)
+{
+ unsigned char lines;
+ if(deviation>15) lines = 0;
+ for(lines=0;lines<4;lines++)
+ {
+  string12864(deviation,lines,(str[lines+pages*4]));
+  delayms(Delay);
+ }
+}
+
+
+
